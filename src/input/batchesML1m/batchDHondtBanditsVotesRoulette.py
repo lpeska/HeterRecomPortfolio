@@ -57,7 +57,7 @@ class BatchDHondtBanditsVotesRoulette:
             aDescDHontRouletteI = InputAggrDefinition.exportADescDHontBanditVotesRoulette3()
 
         pDescr:Portfolio1AggrDescription = Portfolio1AggrDescription(
-            "DHondtRoulettebanditsVotes" + jobID, rIDs, rDescs, aDescDHontRouletteI)
+            "DHondtRouletteBanditsVotes" + jobID, rIDs, rDescs, aDescDHontRouletteI)
 
         model:DataFrame = ModelDefinition.createDHontModel(pDescr.getRecommendersIDs())
 
