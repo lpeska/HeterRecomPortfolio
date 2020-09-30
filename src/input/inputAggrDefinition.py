@@ -75,6 +75,12 @@ class InputAggrDefinition:
         return aDescDHontRoulette3
 
     @staticmethod
+    def exportADescDHontBanditVotesRoulette():
+        aDescDHontBanditVotesRoulette:AggregationDescription = AggregationDescription(AggrDHondtBanditsVotes,
+                                {AggrDHondtBanditsVotes.ARG_SELECTORFNC:(AggrDHondtBanditsVotes.selectorOfRouletteWheelExpRatedItem,[1])})
+        return aDescDHontBanditVotesRoulette    
+    
+    @staticmethod
     def exportADescDHontBanditVotesRoulette3():
         aDescDHontBanditVotesRoulette3:AggregationDescription = AggregationDescription(AggrDHondtBanditsVotes,
                                 {AggrDHondtBanditsVotes.ARG_SELECTORFNC:(AggrDHondtBanditsVotes.selectorOfRouletteWheelExpRatedItem,[3])})
