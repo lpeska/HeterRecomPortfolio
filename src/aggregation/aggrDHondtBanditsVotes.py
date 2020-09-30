@@ -69,6 +69,8 @@ class AggrDHont(AAgregation):
         pI = beta(modelDF.alpha0.loc[mI] + modelDF.r.loc[mI], modelDF.beta0.loc[mI] + (modelDF.n.loc[mI] - methodI.r.loc[mI]), size=1)[0]      
         votesOfPartiesDictI[mI] = pI
       #print("VotesOfPartiesDictI: ", votesOfPartiesDictI)
+      votesOfPartiesDictOriginal = votesOfPartiesDictI.copy()
+    
 
       recommendedItemIDs:List[int] = []
 
@@ -111,7 +113,7 @@ class AggrDHont(AAgregation):
         #print("VotesOfPartiesDictI: ", votesOfPartiesDictI)
 
       # list<int>
-      return recommendedItemIDs[:numberOfItems]
+      return (recommendedItemIDs[:numberOfItems],votesOfPartiesDictOriginal)
 
 
     # methodsResultDict:{String:Series(rating:float[], itemID:int[])},
@@ -140,10 +142,10 @@ class AggrDHont(AAgregation):
             raise ValueError("Argument numberOfItems must be positive value.")
 
 
-        aggregatedItemIDs:List[int] = self.run(methodsResultDict, modelDF, numberOfItems)
+        (aggregatedItemIDs:List[int], votes::dict[str,float]) = self.run(methodsResultDict, modelDF, numberOfItems)
 
         itemsWithResposibilityOfRecommenders:List[int,np.Series[int,str]] = countDHontResponsibility(
-            aggregatedItemIDs, methodsResultDict, modelDF, numberOfItems)
+            aggregatedItemIDs, methodsResultDict, modelDF, numberOfItems, votes)
 
         # list<(itemID:int, Series<(rating:int, methodID:str)>)>
         return itemsWithResposibilityOfRecommenders
