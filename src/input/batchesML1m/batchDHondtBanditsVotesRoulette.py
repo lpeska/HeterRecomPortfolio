@@ -9,7 +9,7 @@ from pandas.core.frame import DataFrame #class
 from portfolioDescription.portfolio1AggrDescription import Portfolio1AggrDescription #class
 
 from evaluationTool.aEvalTool import AEvalTool #class
-from evaluationTool.evalToolDHont import EvalToolDHont #class
+from evaluationTool.evalToolDHondtBanditVotes import EvalToolDHontBanditVotes #class
 
 from aggregationDescription.aggregationDescription import AggregationDescription #class
 
@@ -35,8 +35,7 @@ class BatchDHondtBanditsVotesRoulette:
             for lrClickJ in lrClicks:
                 for lrViewK in lrViews:
                     keyIJ:str = str(rouletteExpI) + "Clk" + str(lrClickJ).replace(".", "") + "View" + str(lrViewK).replace(".", "")
-                    eTool:AEvalTool = EvalToolDHont({EvalToolDHont.ARG_LEARNING_RATE_CLICKS: lrClickJ,
-                                                 EvalToolDHont.ARG_LEARNING_RATE_VIEWS: lrViewK})
+                    eTool:AEvalTool = EvalToolDHontBanditVotes({})
                     aDict[keyIJ] = (rouletteExpI, eTool)
         return aDict
 
