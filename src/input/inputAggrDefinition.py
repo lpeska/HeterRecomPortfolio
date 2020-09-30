@@ -23,6 +23,7 @@ from portfolioDescription.portfolio1AggrDescription import Portfolio1AggrDescrip
 from aggregationDescription.aggregationDescription import AggregationDescription #class
 from aggregation.aggrBanditTS import AggrBanditTS #class
 from aggregation.aggrDHont import AggrDHont #class
+from aggregation.aggrDHondtBanditsVotes import AggrDHondtBanditsVotes #class
 from aggregation.aggrDHontNegativeImplFeedback import AggrDHontNegativeImplFeedback #class
 
 from evaluationTool.evalToolDHont import EvalToolDHont #class
@@ -73,7 +74,11 @@ class InputAggrDefinition:
                                 {AggrDHont.ARG_SELECTORFNC:(AggrDHont.selectorOfRouletteWheelExpRatedItem,[3])})
         return aDescDHontRoulette3
 
-
+    @staticmethod
+    def exportADescDHontBanditVotesRoulette3():
+        aDescDHontBanditVotesRoulette3:AggregationDescription = AggregationDescription(AggrDHondtBanditsVotes,
+                                {AggrDHondtBanditsVotes.ARG_SELECTORFNC:(AggrDHondtBanditsVotes.selectorOfRouletteWheelExpRatedItem,[3])})
+        return aDescDHontBanditVotesRoulette3
 
     @staticmethod
     def exportADescNegDHontFixed(aPenalization:APenalization):
@@ -116,6 +121,13 @@ class ModelDefinition:
         modelDHontDF.set_index("methodID", inplace=True)
         EvalToolDHont.linearNormalizingPortfolioModelDHont(modelDHontDF)
         return modelDHontDF
+    
+    def createDHondtBanditsVotesModel(recommendersIDs: List[str]):
+        modelBanditTSData:List = [[rIdI, 1, 1, 1, 1] for rIdI in recommendersIDs]
+        modelDHontDF:DataFrame = pd.DataFrame(modelDHontData, columns=["methodID", "r", "n", "alpha0", "beta0"])
+        modelDHontDF.set_index("methodID", inplace=True)
+        #EvalToolDHont.linearNormalizingPortfolioModelDHont(modelDHontDF)
+        return modelDHontDF    
 
     def createBanditModel(recommendersIDs:List[str]):
         modelBanditTSData:List = [[rIdI, 1, 1, 1, 1] for rIdI in recommendersIDs]
