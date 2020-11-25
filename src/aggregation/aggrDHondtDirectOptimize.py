@@ -85,7 +85,7 @@ class AggrDHondt(AAgregation):
         actVotesOfCandidatesDictI:dict[int,int] = {} #calculates the proportonal improvement of the output if this candidate is included
         candidateIDJ:int
         for candidateIDJ in uniqueCandidatesI:
-            votesOfCandidateJ:float = 0.0
+           votesOfCandidateJ:float = 0.0
           
            candidateVotesPerParty:dict[str,float] = {mI:methodsResultDict[mI].get(candidateIDJ, 0) for mI in modelDF.index}            
            candidateTotalVotes:float = np.sum(candidateVotesPerParty.values())
