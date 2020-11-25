@@ -54,8 +54,8 @@ class AggrDHondt(AAgregation):
               raise ValueError("Argument modelDF contains in ome method an empty list of items.")
       if numberOfItems < 0:
         raise ValueError("Argument numberOfItems must be positive value.")
-
-      candidatesOfMethods:np.asarray[str] = np.asarray([cI.keys() for cI in methodsResultDict.values()])
+        
+      candidatesOfMethods = [np.array(list(cI.keys())) for cI in methodsResultDict.values()]
       uniqueCandidatesI:List[int] = list(set(np.concatenate(candidatesOfMethods)))
       #print("UniqueCandidatesI: ", uniqueCandidatesI)    
 
@@ -66,8 +66,8 @@ class AggrDHondt(AAgregation):
       
       # votes number of parties
       votesOfPartiesDictI:dict[str,float] = {mI:modelDF.votes.loc[mI] for mI in modelDF.index}
-      totalVotes = np.sum(votesOfPartiesDictI.values())
-      #print("VotesOfPartiesDictI: ", votesOfPartiesDictI)
+      totalVotes = modelDF["votes"].sum()
+      #print("VotesOfPartiesDictI: ", votesOfPartiesDictI, totalVotes)
 
       recommendedItemIDs:List[int] = []
       
@@ -88,8 +88,8 @@ class AggrDHondt(AAgregation):
            votesOfCandidateJ:float = 0.0
           
            candidateVotesPerParty:dict[str,float] = {mI:methodsResultDict[mI].get(candidateIDJ, 0) for mI in modelDF.index}            
-           candidateTotalVotes:float = np.sum(candidateVotesPerParty.values())
-           totalVotesPlusProspected:float = totalSelectedCandidatesVotes + votesOfCandidateJ                      
+           candidateTotalVotes:float = np.sum(list(candidateVotesPerParty.values()))
+           totalVotesPlusProspected:float = totalSelectedCandidatesVotes + candidateTotalVotes                      
             
            for parityIDK in modelDF.index:   
               #get the fraction of under-representation for the party
@@ -97,13 +97,14 @@ class AggrDHondt(AAgregation):
               #sum over all parties & select the highest sum
               votes_fraction_per_party = votesOfPartiesDictI[parityIDK]/totalVotes
               notRepresentedVotesPerParty = max(0,(votes_fraction_per_party * totalVotesPlusProspected) - electedOfPartyDictI[parityIDK]) #max(w_i*(A+C) - a_i,0)
+              #print("Unrepresented,",parityIDK,candidateIDJ,notRepresentedVotesPerParty)
               votesOfCandidateJ += min(notRepresentedVotesPerParty, candidateVotesPerParty[parityIDK]  ) # only account the amount of votes that does not exceed proportional representation            
 
            actVotesOfCandidatesDictI[candidateIDJ] = votesOfCandidateJ
         #print(actVotesOfCandidatesDictI)
 
         # select candidate with highest number of votes
-        #selectedCandidateI:int = AggrDHont.selectorOfTheMostVotedItem(actVotesOfCandidatesDictI)
+        #selectedCandidateI:int = AggrDHont.selectorOfTheMostVotedItem(actVotesOfCandidatesDictI)       
         selectedCandidateI:int = self._selector.select(actVotesOfCandidatesDictI)
 
         # add new selected candidate in results
@@ -114,7 +115,9 @@ class AggrDHondt(AAgregation):
 
         # updating number of elected candidates of parties
         electedOfPartyDictI:dict = {partyIDI:electedOfPartyDictI[partyIDI] + methodsResultDict[partyIDI].get(selectedCandidateI, 0) for partyIDI in electedOfPartyDictI.keys()}
-        #print("DevotionOfPartyDictI: ", devotionOfPartyDictI)
+        totalSelectedCandidatesVotes = np.sum(list(electedOfPartyDictI.values()))
+        #print("electedOfPartyDictI: ", electedOfPartyDictI, totalSelectedCandidatesVotes)
+        
       # list<int>
       return recommendedItemIDs[:numberOfItems]
 
