@@ -57,35 +57,48 @@ class AggrDHondt(AAgregation):
 
       candidatesOfMethods:np.asarray[str] = np.asarray([cI.keys() for cI in methodsResultDict.values()])
       uniqueCandidatesI:List[int] = list(set(np.concatenate(candidatesOfMethods)))
-      #print("UniqueCandidatesI: ", uniqueCandidatesI)
+      #print("UniqueCandidatesI: ", uniqueCandidatesI)    
 
-      # numbers of elected candidates of parties
-      electedOfPartyDictI:dict[str,int] = {mI:1 for mI in modelDF.index}
+      # sum of preference the elected candidates have for each party
+      electedOfPartyDictI:dict[str,float] = {mI:0.0 for mI in modelDF.index}
       #print("ElectedForPartyI: ", electedOfPartyDictI)
 
+      
       # votes number of parties
       votesOfPartiesDictI:dict[str,float] = {mI:modelDF.votes.loc[mI] for mI in modelDF.index}
+      totalVotes = np.sum(votesOfPartiesDictI.values())
       #print("VotesOfPartiesDictI: ", votesOfPartiesDictI)
 
       recommendedItemIDs:List[int] = []
-
+      
+      totalSelectedCandidatesVotes:float = 0.0
+            
+    
       iIndex:int
       for iIndex in range(0, numberOfItems):
         #print("iIndex: ", iIndex)
-
+        
         if len(uniqueCandidatesI) == 0:
             return recommendedItemIDs[:numberOfItems]
 
         # coumputing of votes of remaining candidates
-        actVotesOfCandidatesDictI:dict[int,int] = {}
+        actVotesOfCandidatesDictI:dict[int,int] = {} #calculates the proportonal improvement of the output if this candidate is included
         candidateIDJ:int
         for candidateIDJ in uniqueCandidatesI:
-           votesOfCandidateJ:int = 0
-           parityIDK:str
-           for parityIDK in modelDF.index:
-              partyAffiliationOfCandidateKJ:float = methodsResultDict[parityIDK].get(candidateIDJ, 0)
-              votesOfPartyK:int = votesOfPartiesDictI.get(parityIDK)
-              votesOfCandidateJ += partyAffiliationOfCandidateKJ * votesOfPartyK
+            votesOfCandidateJ:float = 0.0
+          
+           candidateVotesPerParty:dict[str,float] = {mI:methodsResultDict[mI].get(candidateIDJ, 0) for mI in modelDF.index}            
+           candidateTotalVotes:float = np.sum(candidateVotesPerParty.values())
+           totalVotesPlusProspected:float = totalSelectedCandidatesVotes + votesOfCandidateJ                      
+            
+           for parityIDK in modelDF.index:   
+              #get the fraction of under-representation for the party
+              #check how much proportional representation the candidate adds
+              #sum over all parties & select the highest sum
+              votes_fraction_per_party = votesOfPartiesDictI[parityIDK]/totalVotes
+              notRepresentedVotesPerParty = max(0,(votes_fraction_per_party * totalVotesPlusProspected) - electedOfPartyDictI[parityIDK]) #max(w_i*(A+C) - a_i,0)
+              votesOfCandidateJ += min(notRepresentedVotesPerParty, candidateVotesPerParty[parityIDK]  ) # only account the amount of votes that does not exceed proportional representation            
+
            actVotesOfCandidatesDictI[candidateIDJ] = votesOfCandidateJ
         #print(actVotesOfCandidatesDictI)
 
@@ -102,11 +115,6 @@ class AggrDHondt(AAgregation):
         # updating number of elected candidates of parties
         electedOfPartyDictI:dict = {partyIDI:electedOfPartyDictI[partyIDI] + methodsResultDict[partyIDI].get(selectedCandidateI, 0) for partyIDI in electedOfPartyDictI.keys()}
         #print("DevotionOfPartyDictI: ", devotionOfPartyDictI)
-
-        # updating number of votes of parties
-        votesOfPartiesDictI:dict = {partyI: modelDF.votes.loc[partyI] / electedOfPartyDictI.get(partyI) for partyI in modelDF.index}
-        #print("VotesOfPartiesDictI: ", votesOfPartiesDictI)
-
       # list<int>
       return recommendedItemIDs[:numberOfItems]
 
