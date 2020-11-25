@@ -19,9 +19,10 @@ from abc import ABC, abstractmethod
 
 from userBehaviourDescription.userBehaviourDescription import UserBehaviourDescription #class
 
-class AggrDHont(AAgregation):
 
-    ARG_SELECTORFNC:str = "selectorFnc"
+class AggrDHondt(AAgregation):
+
+    ARG_SELECTOR:str = "selector"
 
     def __init__(self, history:AHistory, argumentsDict:dict):
         if not isinstance(history, AHistory):
@@ -30,8 +31,7 @@ class AggrDHont(AAgregation):
             raise ValueError("Argument argumentsDict isn't type dict.")
 
         self._history = history
-        self._selectorFnc = argumentsDict[self.ARG_SELECTORFNC][0]
-        self._selectorArg = argumentsDict[self.ARG_SELECTORFNC][1]
+        self._selector = argumentsDict[self.ARG_SELECTOR]
 
     # methodsResultDict:{String:pd.Series(rating:float[], itemID:int[])},
     # modelDF:pd.DataFrame[numberOfVotes:int], numberOfItems:int
@@ -91,7 +91,7 @@ class AggrDHont(AAgregation):
 
         # select candidate with highest number of votes
         #selectedCandidateI:int = AggrDHont.selectorOfTheMostVotedItem(actVotesOfCandidatesDictI)
-        selectedCandidateI:int = self._selectorFnc(actVotesOfCandidatesDictI, *self._selectorArg)
+        selectedCandidateI:int = self._selector.select(actVotesOfCandidatesDictI)
 
         # add new selected candidate in results
         recommendedItemIDs.append(selectedCandidateI);
@@ -144,38 +144,3 @@ class AggrDHont(AAgregation):
 
         # list<(itemID:int, Series<(rating:int, methodID:str)>)>
         return itemsWithResposibilityOfRecommenders
-
-
-
-
-    # selectors definition
-
-    # resultOfMethod:dict([itemIDs],[raitings])
-    @staticmethod
-    def selectorOfRouletteWheelRatedItem(votesOfCandidatesDict:dict):
-        votesOfCandidatesSer:Series = Series(votesOfCandidatesDict, index=votesOfCandidatesDict.keys())
-        return RouletteWheelSelector.run(votesOfCandidatesSer)
-
-
-    # resultOfMethod:dict([itemIDs],[raitings])
-    @staticmethod
-    def selectorOfRouletteWheelExpRatedItem(votesOfCandidatesDict:dict, exp:int):
-        vcDict:dict = dict(map(lambda mIdJ:(mIdJ, votesOfCandidatesDict[mIdJ] ** exp), votesOfCandidatesDict.keys()))
-
-        votesOfCandidatesSer:Series = Series(vcDict, index=vcDict.keys())
-        return RouletteWheelSelector.run(votesOfCandidatesSer)
-
-
-    # resultOfMethod:dict([itemIDs],[raitings])
-    @staticmethod
-    def selectorOfTheMostVotedItem(votesOfCandidatesDict:dict):
-
-        # get the highest number of votes of remaining candidates
-        maxVotes:float = max(votesOfCandidatesDict.values())
-        # print("MaxVotes: ", maxVotes)
-
-        # select candidate with highest number of votes
-        selectedCandidateI:int = [votesOfCandI for votesOfCandI in votesOfCandidatesDict.keys() if
-                                  votesOfCandidatesDict[votesOfCandI] == maxVotes][0]
-        # print("SelectedCandidateI: ", selectedCandidateI)
-        return selectedCandidateI
